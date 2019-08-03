@@ -13,7 +13,7 @@ load_dotenv(find_dotenv())
 
 storeID = os.getenv('STOREID')
 
-sub = 'chicken tender sub' if len(sys.argv) == 1 else sys.argv[1]
+sub = 'chicken tender sub' if len(sys.argv) == 1 else sys.argv[1] + " sub"
 
 options = Options()
 options.headless = bool(int(os.getenv("HEADLESS")))
@@ -27,7 +27,7 @@ browser.find_element_by_class_name('selectStoreBtn').click()
 browser.find_element_by_id('pblx-txtLocation').send_keys(storeID)
 browser.find_element_by_id('pblx-btnStoreSearch').click()
 # browser.find_element_by_class_name('js-selectStore').click()
-time.sleep(3)
+time.sleep(5)
 browser.find_element_by_xpath('//button[@data-number="'+storeID+'"]').click()
 
 # Navigate add for subs on sale
