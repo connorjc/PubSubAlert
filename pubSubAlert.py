@@ -16,7 +16,7 @@ storeID = os.getenv('STOREID')
 sub = 'chicken tender sub' if len(sys.argv) == 1 else sys.argv[1]
 
 options = Options()
-options.headless = bool(os.getenv("HEADLESS"))
+options.headless = bool(int(os.getenv("HEADLESS")))
 browser = webdriver.Firefox(options=options)
 
 # navigate to weeklyad
@@ -36,8 +36,8 @@ browser.find_element_by_id('goBtnSearchPosition').click()
 
 # parse page
 soup = BeautifulSoup(browser.page_source, features="html.parser")
-results = int(re.match(r'(\d+)', soup.select_one('span[class="nonSneakPeekHeader"]').text).group(0))
-sale = "are" if results != 0 else "not"
+results = bool(int(re.match(r'(\d+)', soup.select_one('span[class="nonSneakPeekHeader"]').text).group(0)))
+sale = "are" if results else "not"
 
 # message the masses
 print(sub, sale, "on sale!")
