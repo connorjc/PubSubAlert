@@ -22,7 +22,7 @@ options = Options()
 options.headless = bool(int(os.getenv("HEADLESS")))
 
 while counter != 0:
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox(options=options, log_path=os.devnull)
 
     try:
         # navigate to weeklyad
