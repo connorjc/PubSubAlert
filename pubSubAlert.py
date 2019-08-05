@@ -15,6 +15,10 @@ from bs4 import BeautifulSoup
 load_dotenv(find_dotenv())
 
 storeID = os.getenv('STOREID')
+sender = os.getenv('SENDER')
+passwd = os.getenv('PASSWD')
+receiver = os.getenv('RECEIVER')
+
 sub = 'chicken tender sub' if len(sys.argv) == 1 else sys.argv[1] + " sub"
 counter = 5
 
@@ -56,7 +60,11 @@ while counter != 0:
         browser.close()
 
 # message the masses
-msg = sub + ' ' + sale +  " on sale!"
+try:
+    msg = sub + ' ' + sale +  " on sale!"
+except NameError:
+    msg = "failure"
+    receiver = sender
 
 # determine the appropriate sale date range: thurs - wed
 thurs = 3
@@ -69,11 +77,8 @@ elif day < thurs:
 
 last = first + datetime.timedelta(days=6)
 msg += " : " + first.strftime('%-m/%-d') + ' - ' + last.strftime('%-m/%-d')
-print(msg)
 
-sender = os.getenv('SENDER')
-passwd = os.getenv('PASSWD')
-receiver = os.getenv('RECEIVER')
+print(msg)
 
 if sender != '' and receiver != '' and passwd != '':
     message = EmailMessage()
