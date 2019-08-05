@@ -65,12 +65,11 @@ day = first.weekday()
 if day > thurs:
     first -= datetime.timedelta(days=day-thurs)
 elif day < thurs:
-    first += datetime.timedelta(days=thurs-day)
+    first -= datetime.timedelta(days=thurs+day+1)
 
 last = first + datetime.timedelta(days=6)
 msg += " : " + first.strftime('%-m/%-d') + ' - ' + last.strftime('%-m/%-d')
 print(msg)
-
 
 sender = os.getenv('SENDER')
 passwd = os.getenv('PASSWD')
