@@ -26,7 +26,7 @@ options = Options()
 options.headless = bool(int(os.getenv("HEADLESS")))
 
 while counter != 0:
-    browser = webdriver.Firefox(options=options, log_path=os.devnull)
+    browser = webdriver.Firefox(options=options, service_log_path=os.devnull)
 
     try:
         # navigate to weeklyad
@@ -66,14 +66,14 @@ except NameError:
     msg = "failure"
     receiver = sender
 
-# determine the appropriate sale date range: thurs - wed
-thurs = 3
+# determine the appropriate sale date range: wed - tue
+wed = 2
 first = datetime.datetime.today()
 day = first.weekday()
-if day > thurs:
-    first -= datetime.timedelta(days=day-thurs)
-elif day < thurs:
-    first -= datetime.timedelta(days=thurs+day+1)
+if day > wed:
+    first -= datetime.timedelta(days=day-wed)
+elif day < wed:
+    first -= datetime.timedelta(days=wed+day+2)
 
 last = first + datetime.timedelta(days=6)
 msg += " : " + first.strftime('%-m/%-d') + ' - ' + last.strftime('%-m/%-d')
