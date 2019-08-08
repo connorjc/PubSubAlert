@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import datetime
 import os
 import re
@@ -12,6 +13,13 @@ from selenium.webdriver.firefox.options import Options
 from dotenv import load_dotenv, find_dotenv
 from bs4 import BeautifulSoup
 
+parser = argparse.ArgumentParser(description="A Publix Supermarket weekly ad \
+        webcrawler designed to determine whether or not chicken tender subs are\
+        on sale. The results of the search will be emailed to specified recpients.")
+parser.add_argument("-d", "--dryrun", help="perform a dry run by not emailing results", action="store_true")
+parser.add_argument("-s", "--sub", help="search for alternate pub sub", action="store", type=str, default="chicken tender")
+args = parser.parse_args()
+
 load_dotenv(find_dotenv())
 
 storeID = os.getenv('STOREID')
@@ -19,7 +27,7 @@ sender = os.getenv('SENDER')
 passwd = os.getenv('PASSWD')
 receiver = os.getenv('RECEIVER')
 
-sub = 'chicken tender sub' if len(sys.argv) == 1 else sys.argv[1] + " sub"
+sub = args.sub + " sub"
 counter = 5
 
 options = Options()
@@ -80,7 +88,7 @@ msg += " : " + first.strftime('%-m/%-d') + ' - ' + last.strftime('%-m/%-d')
 
 print(msg)
 
-if sender != '' and receiver != '' and passwd != '':
+if not args.dryrun and sender != '' and receiver != '' and passwd != '':
     message = EmailMessage()
 
     message['From'] = sender
