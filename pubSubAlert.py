@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser(description="A Publix Supermarket weekly ad \
         on sale. The results of the search will be emailed to specified recpients.")
 parser.add_argument("-d", "--dryrun", help="perform a dry run by not emailing results", action="store_true")
 parser.add_argument("-s", "--sub", help="search for alternate pub sub", action="store", type=str, default="chicken tender")
+parser.add_argument("-f", "--force", help="emergency send a pub sub alert without scraping", action="store_true")
 args = parser.parse_args()
 
 load_dotenv(find_dotenv())
@@ -33,46 +34,49 @@ counter = 5
 options = Options()
 options.headless = bool(int(os.getenv("HEADLESS")))
 
-while counter != 0:
-    browser = webdriver.Firefox(options=options, service_log_path=os.devnull)
+if not args.force:
+    while counter != 0:
+        browser = webdriver.Firefox(options=options, service_log_path=os.devnull)
 
+        try:
+            # navigate to weeklyad
+            browser.get('http://weeklyad.publix.com')
+
+            # specify store
+            browser.find_element_by_class_name('selectStoreBtn').click()
+            browser.find_element_by_id('pblx-txtLocation').send_keys(storeID)
+            browser.find_element_by_id('pblx-btnStoreSearch').click()
+            # browser.find_element_by_class_name('js-selectStore').click()
+            time.sleep(3)
+            browser.find_element_by_xpath('//button[@data-number="'+storeID+'"]').click()
+
+            # Navigate add for subs on sale
+            browser.find_element_by_class_name('searchInputField').send_keys(sub)
+            browser.find_element_by_id('goBtnSearchPosition').click()
+
+            # parse page
+            soup = BeautifulSoup(browser.page_source, features="html.parser")
+            results = bool(int(re.match(r'(\d+)', soup.select_one('span[class="nonSneakPeekHeader"]').text).group(0)))
+
+            sale = "are" if results else "not"
+        except:
+            counter -= 1
+            print("Error encountered:", counter, "attempts left...")
+            time.sleep(10)
+        else:
+            break
+        finally:
+            #close browser
+            browser.close()
+
+    # message the masses
     try:
-        # navigate to weeklyad
-        browser.get('http://weeklyad.publix.com')
-
-        # specify store
-        browser.find_element_by_class_name('selectStoreBtn').click()
-        browser.find_element_by_id('pblx-txtLocation').send_keys(storeID)
-        browser.find_element_by_id('pblx-btnStoreSearch').click()
-        # browser.find_element_by_class_name('js-selectStore').click()
-        time.sleep(3)
-        browser.find_element_by_xpath('//button[@data-number="'+storeID+'"]').click()
-
-        # Navigate add for subs on sale
-        browser.find_element_by_class_name('searchInputField').send_keys(sub)
-        browser.find_element_by_id('goBtnSearchPosition').click()
-
-        # parse page
-        soup = BeautifulSoup(browser.page_source, features="html.parser")
-        results = bool(int(re.match(r'(\d+)', soup.select_one('span[class="nonSneakPeekHeader"]').text).group(0)))
-
-        sale = "are" if results else "not"
-    except:
-        counter -= 1
-        print("Error encountered:", counter, "attempts left...")
-        time.sleep(10)
-    else:
-        break
-    finally:
-        #close browser
-        browser.close()
-
-# message the masses
-try:
-    msg = sub + ' ' + sale +  " on sale!"
-except NameError:
-    msg = "failure"
-    receiver = sender
+        msg = sub + ' ' + sale +  " on sale!"
+    except NameError:
+        msg = "failure"
+        receiver = sender
+else:
+    msg = sub + " are on sale!"
 
 # determine the appropriate sale date range: wed - tue
 wed = 2
